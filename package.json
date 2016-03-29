@@ -1,0 +1,21 @@
+{
+  "name": "data-cleaning",
+  "version": "0.1.0",
+  "description": "Clean timeseries data",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "keywords": [
+    "timeseries",
+    "data",
+    "cleaning",
+    "clean"
+  ],
+  "author": "n.mattise@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.6.1",
+    "stats-analysis": "^2.0.0"
+  }
+}
