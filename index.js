@@ -26,9 +26,8 @@ Timeseries.prototype.setInterval = function() {
 
 Timeseries.prototype.fillMissingAvg = function() {
   var series = this.series;
-  var int = this.interval || 900000;
+  var int = this.interval ;
   var average = series.map(v => v.value).reduce((p, c) => p + c, 0) / series.length;
-  console.log(average);
   var missed = [];
   for (var i = 0; i < series.length - 1; i++) {
     if ((new Date(series[i + 1].timestamp) - new Date(series[i].timestamp)) > int) {
@@ -44,6 +43,31 @@ Timeseries.prototype.fillMissingAvg = function() {
       }
     }
   }
+  this.series = series.concat(missed);
+  this.series.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  return;
+};
+Timeseries.prototype.fillMissingNext = function() {
+  var series = this.series;
+  var int = this.interval ;
+    var missed = [];
+  for (var i = 0; i < series.length - 1; i++) {
+    if ((new Date(series[i + 1].timestamp) - new Date(series[i].timestamp)) > int) {
+      var start = new Date(series[i].timestamp).getTime() + int;
+      var end = new Date(series[i + 1].timestamp).getTime();
+      var avgValue = (series[i].value + series[i + 1].value) / 2;
+      console.log(new Date(series[i].timestamp), avgValue);
+      for (start; start < end; start += int) {
+        missed.push({
+          value: avgValue,
+          timestamp: new Date(start),
+          correction: 'missing'
+        });
+        i++;
+      }
+    }
+  }
+  // console.log(missed);
   this.series = series.concat(missed);
   this.series.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   return;
@@ -68,6 +92,7 @@ Timeseries.prototype.outliers = function() {
   justValues.sort((p, c) => p - c);
   var n = justValues.length;
   var median = justValues[Math.floor(0.5 * (n + 1))];
+  if (median === 0) return;
   var q1 = justValues[Math.floor(0.25 * (n + 1))];
   var q3 = justValues[Math.floor(0.75 * (n + 1))];
   var iq = q3 - q1;
@@ -100,7 +125,8 @@ console.time("outlier");
 ElectricityData.setInterval();
 console.log(ElectricityData.interval);
 ElectricityData.cleanNegative();
-ElectricityData.fillMissingAvg();
+console.log(ElectricityData.series.length);
+ElectricityData.fillMissingNext();
 console.log(ElectricityData.series.length);
 ElectricityData.outliers();
 console.log('Cleaned');
