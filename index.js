@@ -26,7 +26,7 @@ Timeseries.prototype.setInterval = function() {
 
 Timeseries.prototype.fillMissingAvg = function() {
   var series = this.series;
-  var int = this.interval ;
+  var int = this.interval;
   var average = series.map(v => v.value).reduce((p, c) => p + c, 0) / series.length;
   var missed = [];
   for (var i = 0; i < series.length - 1; i++) {
@@ -49,14 +49,14 @@ Timeseries.prototype.fillMissingAvg = function() {
 };
 Timeseries.prototype.fillMissingNext = function() {
   var series = this.series;
-  var int = this.interval ;
-    var missed = [];
+  var int = this.interval;
+  var missed = [];
   for (var i = 0; i < series.length - 1; i++) {
     if ((new Date(series[i + 1].timestamp) - new Date(series[i].timestamp)) > int) {
       var start = new Date(series[i].timestamp).getTime() + int;
       var end = new Date(series[i + 1].timestamp).getTime();
       var avgValue = (series[i].value + series[i + 1].value) / 2;
-      console.log(new Date(series[i].timestamp), avgValue);
+      // console.log(new Date(series[i].timestamp), new Date(series[i + 1].timestamp), avgValue);
       for (start; start < end; start += int) {
         missed.push({
           value: avgValue,
@@ -83,10 +83,6 @@ Timeseries.prototype.cleanNegative = function() {
   }
 };
 
-function magnitude(value) {
-  var order = Math.floor(Math.log(value) / Math.LN10 + 0.000000001);
-  return Math.pow(10, order);
-}
 Timeseries.prototype.outliers = function() {
   var justValues = this.series.map(v => v.value);
   justValues.sort((p, c) => p - c);
@@ -111,9 +107,9 @@ Timeseries.prototype.outliers = function() {
       v.ov = v.value;
       v.correction = 'outlier';
       v.value = upperLimit;
-      return;
+      return v;
     } else {
-      return;
+      return v;
     }
   });
 };
@@ -123,11 +119,13 @@ Timeseries.prototype.outliers = function() {
 console.time("outlier");
 // console.log(WaterData.series.length);
 ElectricityData.setInterval();
-console.log(ElectricityData.interval);
-ElectricityData.cleanNegative();
-console.log(ElectricityData.series.length);
-ElectricityData.fillMissingNext();
-console.log(ElectricityData.series.length);
-ElectricityData.outliers();
+console.log(WaterData.interval);
+WaterData.cleanNegative();
+console.log(WaterData.series.length);
+WaterData.fillMissingNext();
+console.log(WaterData.series.length);
+WaterData.outliers();
 console.log('Cleaned');
 console.timeEnd("outlier");
+
+console.log(WaterData.series);
