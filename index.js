@@ -88,19 +88,26 @@ Timeseries.prototype.outliers = function() {
   justValues.sort((p, c) => p - c);
   var n = justValues.length;
   var median = justValues[Math.floor(0.5 * (n + 1))];
-  if (median === 0) return;
+  if (median === 0) median = 10;
+
   var q1 = justValues[Math.floor(0.25 * (n + 1))];
   var q3 = justValues[Math.floor(0.75 * (n + 1))];
   var iq = q3 - q1;
+  if (iq <= 0) {
+    iq = 5;
+  }
   var perct = 100;
   var limiter = 3;
-  while (perct > 1) {
+  var counter = 0;
+  while (perct > 1 && counter < 101) {
     var upperLimit = q3 + (limiter * iq);
     var lowerLimit = (q1 - (limiter * iq)) < 0 ? 0 : (q1 - (limiter * iq));
     var upperCount = justValues.filter(v => v > upperLimit);
     var lowerCount = justValues.filter(v => v < lowerLimit);
     perct = (upperCount.length / n) * 100;
+    console.log(perct);
     limiter++;
+    counter++;
   }
   this.series = this.series.map(function(v) {
     if (v.value > upperLimit) {
